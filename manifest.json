@@ -5,7 +5,6 @@
     "version": "1.0",
     "permissions": [
         "activeTab",
-        "scripting",
         "tabs",
         "history",
         "storage"
