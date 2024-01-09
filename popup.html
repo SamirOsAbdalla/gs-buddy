@@ -3,10 +3,17 @@
 
 <div class="container">
     <!-- <div class="title">Link Buddy</div> -->
-    <button type="button" class="remove-button">CLEAR VISITED</button>
+    <button type="button" class="clear-button">CLEAR VISITED</button>
     <div class="color-container">
-        <div class="color-title">Choose Link Color</div>
-        <input type="color" class="color-input" />
-        <div class="test-span"></div>
+        <div class="title">Choose Link Color</div>
+        <div class="color-input__container">
+            <input type="color" class="color-input" />
+            <button class="color-input__button reset-button">RESET</button>
+            <button class="color-input__button save-button">SAVE</button>
+        </div>
+    </div>
+    <div class="saved-colors__wrapper">
+        <div class="title">Saved Colors</div>
+        <div class="saved-colors__container"></div>
     </div>
 </div>
