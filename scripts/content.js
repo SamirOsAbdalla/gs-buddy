@@ -64,36 +64,27 @@ function processSublinkContainer({
     jscNode,
     historyItemsArray,
     type,
-    returnedNodes,
     parentNode,
     childNode
 }) {
     let bigLinkContainer = jscNode.firstChild.firstChild
 
-    let visitedSublinks = []
-    let visitedAllSublinks = processSublinks(sublinkContainer, historyItemsArray, type, visitedSublinks)
+    let { visitedSublinks, visitedAllSublinks } = processSublinks(sublinkContainer, historyItemsArray, type)
     let bigLink = processBigLinkContainer(bigLinkContainer, historyItemsArray)
 
     if (type != "CLEARCLICK") {
-        visitedSublinks.forEach(visitedSublink => {
-            returnedNodes.push(visitedSublink)
-        })
-
         if (bigLink) {
-            returnedNodes.push(bigLink)
+            visitedSublinks.push(bigLink)
         }
-        return
+        return visitedSublinks
     }
 
     if (!visitedAllSublinks || !bigLink) {
-        visitedSublinks.forEach(visitedSublink => {
-            returnedNodes.push(visitedSublink)
-        })
-        return
+        return visitedSublinks
     }
 
     if (bigLink) {
-        returnedNodes.push({ parentNode, childNode })
+        return [childNode]
     }
 }
 
@@ -111,10 +102,11 @@ function processBigLinkContainer(bigLinkContainer, historyItemsArray) {
     return undefined
 }
 
-function processSublinks(sublinkContainer, historyItemsArray, type, visitedSublinks) {
-    //handle sublinks
+function processSublinks(sublinkContainer, historyItemsArray, type) {
+
     let sublinkNodes = sublinkContainer.childNodes
     let pushCount = 0
+    let visitedSublinks = []
     for (let childNode of sublinkNodes) {
         let link = childNode.firstChild.firstChild.firstChild
         if (!historyItemsArray.find((dataNode) => foundHistoryItem(dataNode, link))) {
@@ -123,13 +115,16 @@ function processSublinks(sublinkContainer, historyItemsArray, type, visitedSubli
 
         if (type == "CLEARCLICK") {
             pushCount += 1
-            visitedSublinks.push({ parentNode: sublinkContainer, childNode })
+            visitedSublinks.push(childNode)
         } else {
             visitedSublinks.push(link)
         }
     }
 
-    return pushCount == sublinkNodes.length || pushCount == sublinkNodes.length - 1
+    return ({
+        visitedSublinks,
+        visitedAllSublinks: pushCount == sublinkNodes.length || pushCount == sublinkNodes.length - 1
+    })
 }
 
 
@@ -137,7 +132,6 @@ function processNormalNode({
     jscNode,
     historyItemsArray,
     type,
-    returnedNodes,
     parentNode,
     childNode
 }) {
@@ -146,16 +140,15 @@ function processNormalNode({
         visitedLink = visitedLink.firstChild
     }
     if (!visitedLink || !historyItemsArray.find((dataNode) => foundHistoryItem(dataNode, visitedLink))) {
-        return
+        return undefined
     }
 
     if (type == "CLEARCLICK") {
-        returnedNodes.push({ parentNode, childNode })
-        return
+        return childNode
     }
 
     //not a CLEARCLICK means we only need to worry about the individual link
-    returnedNodes.push(visitedLink)
+    return visitedLink
 }
 
 //ASKNODE structure
@@ -167,7 +160,6 @@ function processAskNode({
     jscNode,
     historyItemsArray,
     type,
-    returnedNodes,
     parentNode,
     childNode
 }) {
@@ -178,7 +170,7 @@ function processAskNode({
 
     let numVisitedChildren = 0
     let totalValidChildren = 0
-    let visitedChildren = []
+    let visitedLinks = []
     questionsContainer.childNodes.forEach(questionContainer => {
         if (questionContainer.tagName != "DIV" || !questionContainer.firstChild) {
             return
@@ -199,22 +191,34 @@ function processAskNode({
         }
 
         if (type != "CLEARCLICK") {
-            returnedNodes.push(link)
+            visitedLinks.push(link)
             return
         }
 
         numVisitedChildren += 1
-        visitedChildren.push({ parentNode: questionsContainer, childNode: questionContainer })
-
+        visitedLinks.push(questionContainer)
     })
 
     if (numVisitedChildren > 0 && numVisitedChildren == totalValidChildren) {
-        returnedNodes.push({ parentNode, childNode })
-    } else {
-        visitedChildren.forEach(visitedChild => {
-            returnedNodes.push(visitedChild)
-        })
+        visitedLinks.push(childNode)
     }
+
+    return visitedLinks
+}
+
+
+function getImageNode(jscNode) {
+
+    let imageContainer = jscNode.firstChild?.childNodes[1]
+    if (!imageContainer || !imageContainer.firstChild) {
+        return undefined
+    }
+
+    if (imageContainer.firstChild.tagName == "A" || imageContainer.firstChild.firstChild?.tagName == "A") {
+        return true
+    }
+
+    return undefined
 }
 
 function processChildNodes(parentNode, childNodes, historyItemsArray, type) {
@@ -228,39 +232,47 @@ function processChildNodes(parentNode, childNodes, historyItemsArray, type) {
 
         let sublinkContainer = getSublinkContainer(jscNode)
         if (sublinkContainer) {
-            processSublinkContainer({
+            let visitedLinks = processSublinkContainer({
                 jscNode,
                 sublinkContainer,
                 historyItemsArray,
                 type,
-                returnedNodes,
                 parentNode,
                 childNode
             })
 
+            visitedLinks?.forEach(visitedLink => {
+                returnedNodes.push(visitedLink)
+            })
             return
         }
 
         let isAskNode = jscNode.getAttribute("data-initq")
         if (isAskNode) {
-            processAskNode({
+            let visitedLinks = processAskNode({
                 jscNode,
                 historyItemsArray,
                 type,
-                returnedNodes,
                 parentNode,
                 childNode
             })
+            visitedLinks?.forEach(visitedLink => {
+                returnedNodes.push(visitedLink)
+            })
+            return
         }
         else {
-            processNormalNode({
+            let visitedLink = processNormalNode({
                 jscNode,
                 historyItemsArray,
                 type,
-                returnedNodes,
                 parentNode,
                 childNode
             })
+
+            if (visitedLink) {
+                returnedNodes.push(visitedLink)
+            }
         }
 
 
@@ -270,8 +282,10 @@ function processChildNodes(parentNode, childNodes, historyItemsArray, type) {
 
 
 function deleteNodes(returnedNodes) {
-    returnedNodes.forEach(({ parentNode, childNode }) => {
-        parentNode.removeChild(childNode)
+
+    returnedNodes.forEach((visitedNode) => {
+        visitedNode.style.display = "none"
+        // parentNode.removeChild(childNode)
     })
 }
 
