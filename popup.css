@@ -12,7 +12,7 @@
     flex-direction: column;
     gap: 4em;
     align-items: center;
-    border: 2px solid #ffaebb;
+    border: 2px solid #aed2ff;
     border-radius: 4px;
 
 }
@@ -57,11 +57,11 @@
 
 .clear-button {
     height: 38px;
-    background-color: #f2648c;
+    background-color: #1e48b2;
 }
 
 .reset-button {
-    background-color: #f2648c;
+    background-color: #1e48b2;
 
 }
 
@@ -75,7 +75,7 @@
     appearance: none;
     border: 0;
     border-radius: 6px;
-    box-shadow: rgba(45, 35, 66, .4) 0 2px 4px, rgba(45, 35, 66, .3) 0 7px 13px -3px, rgba(111, 58, 73, 0.5) 0 -3px 0 inset;
+    box-shadow: rgba(45, 35, 66, .4) 0 2px 4px, rgba(45, 35, 66, .3) 0 7px 13px -3px, rgba(50, 67, 95, 0.709) 0 -3px 0 inset;
     box-sizing: border-box;
     color: #fff;
     display: inline-flex;
@@ -101,7 +101,7 @@
 
 .clear-button:focus,
 .color-input__button:focus {
-    box-shadow: #cf618b 0 0 0 1.5px inset, rgba(45, 35, 66, .4) 0 2px 4px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #cf618b 0 -3px 0 inset;
+    box-shadow: #4169d1 0 0 0 1.5px inset, rgba(45, 35, 66, .4) 0 2px 4px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #4169d1 0 -3px 0 inset;
 }
 
 .save-button:focus {
@@ -111,7 +111,7 @@
 
 .clear-button:hover,
 .color-input__button:hover {
-    box-shadow: rgba(45, 35, 66, .4) 0 4px 8px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #a64d6f 0 -3px 0 inset;
+    box-shadow: rgba(45, 35, 66, .4) 0 4px 8px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #4169d1 0 -3px 0 inset;
 }
 
 .save-button:hover {
@@ -121,7 +121,7 @@
 
 .clear-button:active,
 .color-input__button:active {
-    box-shadow: #a64d6f 0 3px 7px inset;
+    box-shadow: #4169d1 0 3px 7px inset;
     transform: translateY(2px);
 }
 
