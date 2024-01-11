@@ -83,7 +83,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         return
     }
 
-
     document.getElementsByClassName("clear-button")[0].addEventListener("click", (event) => {
         chrome.history.search(
             defaultHistorySearchObject,
