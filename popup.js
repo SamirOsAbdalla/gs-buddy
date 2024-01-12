@@ -23,7 +23,7 @@ async function getActiveTabURL() {
 function sendMessageCB(tabId, type, data, chosenColor) {
     chrome.tabs.sendMessage(tabId, {
         type,
-        data,
+        historyItemsArray: data,
         chosenColor
     })
 }
@@ -67,18 +67,24 @@ function appendSavedColors(savedColorsContainer, tabId) {
     })
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-    const activeTab = await getActiveTabURL();
-
-
+function initializePopup(tabId) {
     let input = document.querySelector(".color-input")
     setInputColor(input)
 
-    let tabId = activeTab.id
     let savedColorsContainer = document.querySelector(".saved-colors__container")
     appendSavedColors(savedColorsContainer, tabId)
 
+    let inputSlider = document.querySelector(".input-slider")
+    chrome.storage.local.get("autoClear", ({ autoClear }) => {
+        autoClear ? inputSlider.style.left = "52%" : inputSlider.style.left = "5%"
+    })
+}
 
+document.addEventListener("DOMContentLoaded", async () => {
+    const activeTab = await getActiveTabURL();
+    let tabId = activeTab.id
+
+    initializePopup(tabId)
     if (!activeTab.url.startsWith(extensionURL)) {
         return
     }
@@ -125,5 +131,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         )
     })
 
+    document.getElementsByClassName("checkbox-label")[0].addEventListener("click", (event) => {
+        chrome.storage.local.get("autoClear", ({ autoClear }) => {
+            let inputSlider = document.querySelector(".input-slider")
+
+            let newStatus = !autoClear
+            //do opposite
+            newStatus ? inputSlider.style.left = "52%" : inputSlider.style.left = "5%"
+            chrome.storage.local.set({ "autoClear": newStatus })
+
+
+            //Need to send clear click and check for auto clear status at the same time
+            chrome.tabs.sendMessage(tabId, {
+                type: `AUTOCLEAR${newStatus.toString().toUpperCase()}`,
+                historyItemsArray: [],
+                undefined
+            })
+        })
+    })
 
 })
