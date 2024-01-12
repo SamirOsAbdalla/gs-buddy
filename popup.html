@@ -2,7 +2,6 @@
 <script type="module" src="popup.js"></script>
 
 <div class="container">
-    <!-- <div class="title">Link Buddy</div> -->
     <button type="button" class="clear-button">CLEAR VISITED</button>
     <div class="color-container">
         <div class="title">Choose Link Color</div>
@@ -12,7 +11,14 @@
             <button class="color-input__button save-button">SAVE</button>
         </div>
     </div>
-    <div class="saved-colors__wrapper">
+    <div class="auto-clear__container">
+        <div class="auto-clear__title">Auto Clear Links</div>
+        <label class="checkbox-label" for="binary-input">
+            <input id="binary-input" class="binary-input" type="checkbox" />
+            <span class="input-slider"></span>
+        </label>
+    </div>
+    <div class=" saved-colors__wrapper">
         <div class="title">Saved Colors</div>
         <div class="saved-colors__container"></div>
     </div>
