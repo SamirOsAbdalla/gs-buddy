@@ -129,3 +129,37 @@
     box-shadow: rgb(67, 1, 67) 0 3px 7px inset;
 
 }
+
+.auto-clear__container {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.checkbox-label {
+    position: relative;
+    background-color: black;
+
+    border-radius: 20px;
+    height: 35px;
+    width: 70px;
+}
+
+.checkbox-label input {
+    display: none;
+}
+
+.input-slider {
+    transition: 0.2s ease;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 5%;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background-color: rgb(252, 0, 0);
+    width: 30px;
+    height: 30px;
+}
