@@ -23,7 +23,7 @@ async function getActiveTabURL() {
 function sendMessageCB(tabId, type, data, chosenColor) {
     chrome.tabs.sendMessage(tabId, {
         type,
-        historyItemsArray: data,
+        historyItems: data,
         chosenColor
     })
 }
@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     })
 
     document.getElementsByClassName("reset-button")[0].addEventListener("click", (event) => {
-        input.value = defaultVisitedColor
+        document.querySelector(".color-input").value = defaultVisitedColor
         chrome.history.search(
             defaultHistorySearchObject,
             (data) => sendMessageCB(tabId, "COLORCHANGE", data, defaultVisitedColor)
@@ -144,7 +144,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             //Need to send clear click and check for auto clear status at the same time
             chrome.tabs.sendMessage(tabId, {
                 type: `AUTOCLEAR${newStatus.toString().toUpperCase()}`,
-                historyItemsArray: [],
+                historyItems: [],
                 undefined
             })
         })
