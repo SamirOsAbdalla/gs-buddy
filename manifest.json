@@ -22,8 +22,8 @@
         {
             "js": [
                 "scripts/util.js",
-                "scripts/images.js",
                 "scripts/biglink.js",
+                "scripts/outliers.js",
                 "scripts/content.js"
             ],
             "matches": [
