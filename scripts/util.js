@@ -6,12 +6,33 @@ function deleteNodes(returnedNodes) {
     })
 }
 
+function setDescendantsColor(returnedNode, chosenColor) {
+    if (returnedNode.style) {
+        returnedNode.style.color = chosenColor
+    }
+    returnedNode.childNodes?.forEach(childNode => {
+        setDescendantsColor(childNode, chosenColor)
+    })
+}
 function setNodeColors(returnedNodes, chosenColor) {
-    returnedNodes.forEach(returnedNode => { returnedNode.style.color = chosenColor })
+    returnedNodes.forEach(returnedNode => {
+        setDescendantsColor(returnedNode, chosenColor)
+    })
 }
 
-function foundHistoryItem(dataNode, visitedLink) {
-    return (dataNode.url == visitedLink.href || dataNode.title == visitedLink.text)
+function foundHistoryItem(historyItems, visitedLink) {
+
+    let index = historyItems.findIndex(dataNode => {
+        return dataNode.url == visitedLink.href || dataNode.title == visitedLink.text
+    })
+
+    return index != -1
+}
+
+function appendLinks(visitedLinks, returnLinks) {
+    visitedLinks.forEach(visitedLink => {
+        returnLinks.push(visitedLink)
+    })
 }
 
 //JSC = jscontroller
@@ -57,12 +78,13 @@ function findNodeWithJSCAtrr(currentNode) {
     //Third Scenario
     while (firstChild && firstChild.getAttribute) {
 
-        if (firstChild.getAttribute("data-surl")?.startsWith("https://www.youtube.com")) {
+        if (firstChild.getAttribute("data-surl")?.startsWith("https://www.youtube.com") || firstChild.href?.startsWith("https://www.youtube.com")) {
             return firstChild
         }
 
-        if ((firstChild.firstChild && firstChild.firstChild.tagName == "H2") || (firstChild.getAttribute("jsaction") && firstChild.getAttribute("jsshadow") && firstChild.tagName == "DIV")) {
-            firstChild = firstChild.childNodes[1]
+        if ((firstChild.firstChild && firstChild.firstChild.tagName == "H2") || (firstChild.getAttribute("jsaction") && firstChild.getAttribute("jsshadow") && firstChild.tagName == "DIV") || (firstChild.firstChild && firstChild.firstChild.tagName == "SCRIPT")) {
+            let childNodesLength = firstChild.childNodes.length
+            firstChild = firstChild.childNodes[childNodesLength - 1]
         } else {
             firstChild = firstChild.firstChild
         }
@@ -85,7 +107,7 @@ function initializeObserver() {
         }
 
         mutationList[mutationList.length - 1].target.firstChild.childNodes.forEach(node => {
-            let returnedNodes = processChildNodes(node, node.childNodes, previousHistoryItemsArray, "CLEARCLICK")
+            let returnedNodes = processChildNodes(node, node.childNodes, previoushistoryItems, "CLEARCLICK")
             console.log(returnedNodes)
             //deleteNodes(returnedNodes)
             return

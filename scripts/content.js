@@ -1,11 +1,11 @@
 // need this variable so mutation observer has access to history
-let previousHistoryItemsArray = []
 let autoClearStatus = false
 initializeObserver()
 
+
 function processNormalNode({
     jscNode,
-    historyItemsArray,
+    historyItems,
     type,
     parentNode,
     childNode
@@ -15,7 +15,7 @@ function processNormalNode({
         visitedLink = visitedLink.firstChild
     }
 
-    if (!visitedLink || !historyItemsArray.find((dataNode) => foundHistoryItem(dataNode, visitedLink))) {
+    if (!visitedLink || !foundHistoryItem(historyItems, visitedLink)) {
         return undefined
     }
 
@@ -34,7 +34,7 @@ function processNormalNode({
 // Qn
 function processAskNode({
     jscNode,
-    historyItemsArray,
+    historyItems,
     type,
     parentNode,
     childNode
@@ -62,7 +62,7 @@ function processAskNode({
         while (link && link.tagName != "A") {
             link = link.firstChild
         }
-        if (!link || !historyItemsArray.find((dataNode) => foundHistoryItem(dataNode, link))) {
+        if (!link || !foundHistoryItem(historyItems, link)) {
             return
         }
 
@@ -82,76 +82,10 @@ function processAskNode({
     return visitedLinks
 }
 
-function processTable(historyItemsArray) {
-    //handle possible table
-    let table = document.getElementsByTagName("table")
-    let visitedLinks = []
-    let allChildrenVisited = false
-    let visitedCount = 0
-    if (table) {
-        let rows = table[0].rows
-        for (let i = 0; i < rows.length; i++) {
-            if (i == 0) {
-                continue
-            }
-
-            let link = rows[i]
-            while (link && link.tagName != "A") {
-                link = link.firstChild
-            }
-            if (!link) {
-                continue
-            }
-
-            if (historyItemsArray.find((dataNode) => foundHistoryItem(dataNode, link))) {
-                visitedCount += 1
-                visitedLinks.push(rows[i])
-            }
-        }
-
-        allChildrenVisited = (visitedCount == rows.length - 1)
-        if (!allChildrenVisited) {
-            return visitedLinks
-        }
-        //now check for the main link to see if we remove entire block or just the table links
-        let baseLink = table[0].parentNode.firstChild
-        while (baseLink && baseLink.tagName != "A") {
-            baseLink = baseLink.firstChild
-        }
-        if (!baseLink) {
-            return visitedLinks
-        }
-        if (historyItemsArray.find((dataNode) => foundHistoryItem(dataNode, baseLink))) {
-            return [table[0].parentElement.parentElement.parentElement]
-        }
-    }
-
-    return visitedLinks
-}
-
-function handleOutliers(parentNode, childNodes, historyItemsArray) {
-
-    let returnLinks = []
-    {
-        let allVisitedNode = parentNode.childNodes[0]
-        let visitedLinks = handleImagesNode(historyItemsArray, allVisitedNode)
-        visitedLinks?.forEach(visitedLink => {
-            returnLinks.push(visitedLink)
-        })
-    }
-    {
-        let visitedLinks = processTable(historyItemsArray)
-        visitedLinks.forEach(visitedLink => {
-            returnLinks.push(visitedLink)
-        })
-    }
-    return returnLinks
-}
-
-function processChildNodes(parentNode, childNodes, historyItemsArray, type) {
+function processChildNodes(parentNode, childNodes, historyItems, type) {
     let returnedNodes = []
 
-    let outlierVisitedLinks = handleOutliers(parentNode, childNodes, historyItemsArray)
+    let outlierVisitedLinks = handleOutliers(parentNode, childNodes, historyItems)
     outlierVisitedLinks.forEach(link => {
         returnedNodes.push(link)
     })
@@ -167,7 +101,7 @@ function processChildNodes(parentNode, childNodes, historyItemsArray, type) {
             let visitedLinks = processSublinkContainer({
                 jscNode,
                 sublinkContainer,
-                historyItemsArray,
+                historyItems,
                 type,
                 parentNode,
                 childNode
@@ -183,7 +117,7 @@ function processChildNodes(parentNode, childNodes, historyItemsArray, type) {
         if (isAskNode) {
             let visitedLinks = processAskNode({
                 jscNode,
-                historyItemsArray,
+                historyItems,
                 type,
                 parentNode,
                 childNode
@@ -197,7 +131,7 @@ function processChildNodes(parentNode, childNodes, historyItemsArray, type) {
 
             let visitedLink = processNormalNode({
                 jscNode,
-                historyItemsArray,
+                historyItems,
                 type,
                 parentNode,
                 childNode
@@ -215,20 +149,18 @@ function processChildNodes(parentNode, childNodes, historyItemsArray, type) {
 
 
 chrome.runtime.onMessage.addListener((obj, sender, response) => {
-    const { type, historyItemsArray, chosenColor } = obj
+    const { type, historyItems, chosenColor } = obj
 
-    previousHistoryItemsArray = historyItemsArray
     if (type == "AUTOCLEARTRUE" || type == "AUTOCLEARFALSE") {
         autoClearStatus = (type == "AUTOCLEARTRUE" ? true : false)
         return
     }
 
-    previousHistoryItemsArray = historyItemsArray
     if (type == "CLEARCLICK") {
         let searchNodesContainerList = document.querySelectorAll("[data-async-context]")
         searchNodesContainerList.forEach(node => {
             if (node.getAttribute("data-async-context").includes("query:")) {
-                let returnedNodes = processChildNodes(node, node.childNodes, historyItemsArray, type)
+                let returnedNodes = processChildNodes(node, node.childNodes, historyItems, type)
                 deleteNodes(returnedNodes)
                 return
             }
@@ -238,7 +170,7 @@ chrome.runtime.onMessage.addListener((obj, sender, response) => {
         let returnedNodes = []
         for (let i = 0; i < allLinks.length; i++) {
             let link = allLinks[i]
-            if (historyItemsArray.find(historyItem => foundHistoryItem(historyItem, link))) {
+            if (foundHistoryItem(historyItems, link)) {
                 returnedNodes.push(link)
             }
         }

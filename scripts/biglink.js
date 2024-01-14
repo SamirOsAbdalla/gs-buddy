@@ -28,15 +28,15 @@ function getSublinkContainer(currentNode) {
 function processSublinkContainer({
     sublinkContainer,
     jscNode,
-    historyItemsArray,
+    historyItems,
     type,
     parentNode,
     childNode
 }) {
     let bigLinkContainer = jscNode.firstChild.firstChild
 
-    let { visitedSublinks, visitedAllSublinks } = processSublinks(sublinkContainer, historyItemsArray, type)
-    let bigLink = processBigLinkContainer(bigLinkContainer, historyItemsArray)
+    let { visitedSublinks, visitedAllSublinks } = processSublinks(sublinkContainer, historyItems, type)
+    let bigLink = processBigLinkContainer(bigLinkContainer, historyItems)
 
     if (type != "CLEARCLICK") {
         if (bigLink) {
@@ -54,7 +54,7 @@ function processSublinkContainer({
     }
 }
 
-function processBigLinkContainer(bigLinkContainer, historyItemsArray) {
+function processBigLinkContainer(bigLinkContainer, historyItems) {
 
     let bigLink = bigLinkContainer
     while (bigLink && bigLink.tagName != "A") {
@@ -64,21 +64,21 @@ function processBigLinkContainer(bigLinkContainer, historyItemsArray) {
     if (!bigLink) {
         return undefined
     }
-    if (historyItemsArray.find((dataNode) => foundHistoryItem(dataNode, bigLink))) {
+    if (foundHistoryItem(historyItems, link)) {
         return bigLink
     }
 
     return undefined
 }
 
-function processSublinks(sublinkContainer, historyItemsArray, type) {
+function processSublinks(sublinkContainer, historyItems, type) {
 
     let sublinkNodes = sublinkContainer.childNodes
     let pushCount = 0
     let visitedSublinks = []
     for (let childNode of sublinkNodes) {
         let link = childNode.firstChild.firstChild.firstChild
-        if (!historyItemsArray.find((dataNode) => foundHistoryItem(dataNode, link))) {
+        if (!foundHistoryItem(historyItems, link)) {
             continue
         }
 
