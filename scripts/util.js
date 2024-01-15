@@ -30,7 +30,7 @@ function foundHistoryItem(historyItems, visitedLink) {
 }
 
 function appendLinks(visitedLinks, returnLinks) {
-    visitedLinks.forEach(visitedLink => {
+    visitedLinks?.forEach(visitedLink => {
         returnLinks.push(visitedLink)
     })
 }
@@ -66,12 +66,13 @@ function findNodeWithJSCAtrr(currentNode) {
 
     //Second scenario
     let firstChild = currentNode.firstChild
+
     if (!firstChild || !firstChild.childNodes) {
         return undefined
     }
 
     returnNode = findJSCAttribute(firstChild.childNodes)
-    if (returnNode) {
+    if (returnNode && !returnNode.childNodes[1]?.getAttribute("jsslot")) {
         return returnNode
     }
 
