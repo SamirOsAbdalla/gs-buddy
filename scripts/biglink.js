@@ -64,7 +64,7 @@ function processBigLinkContainer(bigLinkContainer, historyItems) {
     if (!bigLink) {
         return undefined
     }
-    if (foundHistoryItem(historyItems, link)) {
+    if (foundHistoryItem(historyItems, bigLink)) {
         return bigLink
     }
 
