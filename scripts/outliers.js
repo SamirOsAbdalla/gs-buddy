@@ -101,7 +101,7 @@ function getHeading(headingInnerText) {
     let headingNodes = document.querySelectorAll(`[role="heading"]`)
     let videoHeadingNode = undefined;
     for (let i = 0; i < headingNodes.length; i++) {
-        if (headingNodes[i].firstChild && (headingNodes[i].firstChild.tagName == "SPAN" || headingNodes[i].tagName == "DIV") && (headingNodes[i].firstChild.innerText == headingInnerText || headingNodes[i].innerText == headingInnerText)) {
+        if (headingNodes[i].firstChild && (headingNodes[i].firstChild.tagName == "SPAN" || headingNodes[i].tagName == "DIV") && (headingNodes[i].firstChild.innerText == headingInnerText || headingNodes[i].innerText == headingInnerText || headingNodes[i].firstChild?.firstChild?.innerText == headingInnerText)) {
             return headingNodes[i]
         }
     }
@@ -119,11 +119,20 @@ function processVideos(historyItems) {
     }
 
     let visitedLinks = []
-    let videosContainer = videoHeadingNode.parentNode.parentNode.parentNode.parentNode.childNodes[1]?.childNodes[1]
+
+    let videosContainer;
+    while (videoHeadingNode && !videoHeadingNode.getAttribute("jscontroller")) {
+        videoHeadingNode = videoHeadingNode.parentNode
+    }
+    if (!videoHeadingNode) {
+        return
+    }
+    videosContainer = videoHeadingNode.childNodes[1]?.childNodes[1]
 
     let visitedCount = 0
-    let childNodesLength = videosContainer.childNodes ? videosContainer.childNodes.length : 0
-    videosContainer.childNodes?.forEach(video => {
+
+    let childNodesLength = videosContainer?.childNodes ? videosContainer.childNodes.length : 0
+    videosContainer?.childNodes?.forEach(video => {
         let link = video
         while (link && link.tagName != "A") {
             link = link.firstChild
@@ -280,7 +289,6 @@ function processRelatedSearches(historyItems) {
             linkContainer = container.firstChild.childNodes[1].childNodes[2].firstChild.firstChild.firstChild.childNodes[1].firstChild.firstChild.firstChild
         } else if (index % 2 == 1) {
             let medium = container.firstChild.firstChild.childNodes[2].firstChild.firstChild
-            console.log(medium)
             linkContainer = container.firstChild.firstChild.childNodes[2].firstChild.firstChild.firstChild.childNodes[1].firstChild.firstChild.firstChild
         }
 
@@ -332,7 +340,6 @@ function handleOutliers(parentNode, childNodes, historyItems) {
     {
         let visitedLinks = processBlockComponent(historyItems)
         appendLinks(visitedLinks, returnLinks)
-
     }
     {
         let visitedLinks = processSearchIconNode(historyItems)
