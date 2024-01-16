@@ -96,7 +96,6 @@ function findNodeWithJSCAtrr(currentNode) {
 }
 
 function initializeObserver() {
-
     const callback = (mutationList, observer) => {
         //check if user enabled auto clear
         if (!autoClearStatus) {
@@ -107,14 +106,14 @@ function initializeObserver() {
             return
         }
 
-        mutationList[mutationList.length - 1].target.firstChild.childNodes.forEach(node => {
-            let returnedNodes = processChildNodes(node, node.childNodes, previoushistoryItems, "CLEARCLICK")
-            console.log(returnedNodes)
-            //deleteNodes(returnedNodes)
-            return
-
+        let searchNodesContainerList = document.querySelectorAll("[data-async-context]")
+        searchNodesContainerList.forEach(node => {
+            if (node.getAttribute("data-async-context").includes("query:")) {
+                let returnedNodes = processChildNodes(node, node.childNodes, previousHistoryItems, "CLEARCLICK")
+                deleteNodes(returnedNodes)
+                return
+            }
         })
-        // let all = document.querySelectorAll("[data-nr]")
 
     };
 
