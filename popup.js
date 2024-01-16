@@ -1,5 +1,5 @@
 let defaultVisitedColor = "#681da8"
-
+const defaultHeight = "340px"
 //duplicated code but chrome is a little funky regarding imports
 //only one var but currently wary of accumulated code smell
 const extensionURL = 'https://www.google.com/search';
@@ -28,7 +28,7 @@ function sendMessageCB(tabId, type, data, chosenColor) {
     })
 }
 
-function setInputColor(input) {
+async function setInputColor(input) {
     chrome.storage.local.get("chosenColor", ({ chosenColor }) => {
         if (chosenColor) {
             input.value = chosenColor
@@ -51,9 +51,41 @@ function populateSavedColorDiv(tabId, childDiv, newColor) {
             (data) => sendMessageCB(tabId, "COLORCHANGE", data, newColor)
         )
     })
+    childDiv.addEventListener("mousedown", (event) => {
+
+        //right click
+        if (event.which == 3) {
+            let parentNode = document.querySelector(".saved-colors__container")
+
+            let childNodes = parentNode.childNodes
+            if (!childNodes) {
+                return
+            }
+            let arrayLength = childNodes.length
+            for (let i = 0; i < arrayLength; i++) {
+                if (childNodes[i] == event.currentTarget) {
+                    parentNode.removeChild(childNodes[i])
+                    break;
+                }
+            }
+            chrome.storage.local.get("savedColors", ({ savedColors }) => {
+                if (!savedColors) {
+                    return
+                }
+
+                let filteredColors = savedColors.filter(childNode => {
+                    childNode != event.currentTarget
+                })
+
+                chrome.storage.local.set({ "savedColors": filteredColors })
+            })
+            document.getElementsByTagName('html')[0].style.height = defaultHeight
+            document.body.style.height = defaultHeight
+        }
+    })
 }
 
-function appendSavedColors(savedColorsContainer, tabId) {
+async function appendSavedColors(savedColorsContainer, tabId) {
     chrome.storage.local.get("savedColors", ({ savedColors }) => {
         if (!savedColors) {
             return
@@ -67,18 +99,38 @@ function appendSavedColors(savedColorsContainer, tabId) {
     })
 }
 
-function initializePopup(tabId) {
+async function initializePopup(tabId) {
     let input = document.querySelector(".color-input")
-    setInputColor(input)
+    await setInputColor(input)
 
     let savedColorsContainer = document.querySelector(".saved-colors__container")
-    appendSavedColors(savedColorsContainer, tabId)
+    await appendSavedColors(savedColorsContainer, tabId)
 
     let inputSlider = document.querySelector(".input-slider")
-    chrome.storage.local.get("autoClear", ({ autoClear }) => {
+    await chrome.storage.local.get("autoClear", ({ autoClear }) => {
         autoClear ? inputSlider.style.left = "52%" : inputSlider.style.left = "5%"
     })
 }
+
+function sendAutoClearMessage(tabId) {
+    chrome.storage.local.get("autoClear", ({ autoClear }) => {
+        let inputSlider = document.querySelector(".input-slider")
+
+        let newStatus = !autoClear
+        //do opposite
+        newStatus ? inputSlider.style.left = "52%" : inputSlider.style.left = "5%"
+        chrome.storage.local.set({ "autoClear": newStatus })
+
+
+        chrome.history.search(
+            defaultHistorySearchObject,
+            (data) => sendMessageCB(tabId, `AUTOCLEAR${newStatus.toString().toUpperCase()}`, data, undefined)
+        )
+
+    })
+}
+
+
 
 document.addEventListener("DOMContentLoaded", async () => {
     const activeTab = await getActiveTabURL();
@@ -132,22 +184,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     })
 
     document.getElementsByClassName("checkbox-label")[0].addEventListener("click", (event) => {
-        chrome.storage.local.get("autoClear", ({ autoClear }) => {
-            let inputSlider = document.querySelector(".input-slider")
-
-            let newStatus = !autoClear
-            //do opposite
-            newStatus ? inputSlider.style.left = "52%" : inputSlider.style.left = "5%"
-            chrome.storage.local.set({ "autoClear": newStatus })
-
-
-            //Need to send clear click and check for auto clear status at the same time
-            chrome.tabs.sendMessage(tabId, {
-                type: `AUTOCLEAR${newStatus.toString().toUpperCase()}`,
-                historyItems: [],
-                undefined
-            })
-        })
+        sendAutoClearMessage(tabId)
     })
 
 })
