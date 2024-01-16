@@ -109,6 +109,12 @@ async function initializePopup(tabId) {
     let inputSlider = document.querySelector(".input-slider")
     await chrome.storage.local.get("autoClear", ({ autoClear }) => {
         autoClear ? inputSlider.style.left = "52%" : inputSlider.style.left = "5%"
+        let binaryInput = document.querySelector(".binary-input")
+        if (!autoClear) {
+            binaryInput.checked = false
+        } else {
+            binaryInput.checked = true
+        }
     })
 }
 
@@ -156,19 +162,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     })
 
     document.getElementsByClassName("save-button")[0].addEventListener("click", (event) => {
-        let childDiv = document.createElement("div")
-        let input = document.querySelector(".color-input")
-        let newColor = input.value
-        populateSavedColorDiv(tabId, childDiv, newColor)
-
-        let savedColorsContainer = document.querySelector(".saved-colors__container")
-        savedColorsContainer.appendChild(childDiv)
-
         chrome.storage.local.get("savedColors", ({ savedColors }) => {
             let savedColorsArray = [];
             if (savedColors) {
                 savedColorsArray = savedColors
             }
+
+            if (savedColorsArray.length >= 36) {
+                return
+            }
+            let childDiv = document.createElement("div")
+            let input = document.querySelector(".color-input")
+            let newColor = input.value
+            populateSavedColorDiv(tabId, childDiv, newColor)
+
+            let savedColorsContainer = document.querySelector(".saved-colors__container")
+            savedColorsContainer.appendChild(childDiv)
 
             savedColorsArray.push(newColor)
             chrome.storage.local.set({ "savedColors": savedColorsArray })
