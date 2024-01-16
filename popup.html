@@ -1,25 +1,43 @@
 <link href="popup.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Varela+Round">
 <script type="module" src="popup.js"></script>
 
-<div class="container">
-    <button type="button" class="clear-button">CLEAR VISITED</button>
-    <div class="color-container">
-        <div class="title">Choose Link Color</div>
-        <div class="color-input__container">
-            <input type="color" class="color-input" />
-            <button class="color-input__button reset-button">RESET</button>
-            <button class="color-input__button save-button">SAVE</button>
+<div class="popup-container">
+    <div class="popup-container__top">
+        <div class="header__container">
+            <span class="header">Google Search Buddy</span>
         </div>
+        <button type="button" class="clear-button">CLEAR VISITED</button>
     </div>
-    <div class="auto-clear__container">
-        <div class="auto-clear__title">Auto Clear Links</div>
-        <label class="checkbox-label" for="binary-input">
-            <input id="binary-input" class="binary-input" type="checkbox" />
-            <span class="input-slider"></span>
-        </label>
-    </div>
-    <div class=" saved-colors__wrapper">
-        <div class="title">Saved Colors</div>
-        <div class="saved-colors__container"></div>
+    <div class="popup-container__bottom">
+        <div class="auto-clear__container">
+            <div class="title">Auto-clear links</div>
+
+            <!-- <div class="auto-clear__left">
+                <div class="title">Auto-clear links</div>
+                <span class="auto-clear__tooltip--indicator">i</span>
+                <div class="auto-clear__tooltip--message">
+                    Links that are ctrl+click will not be automatically cleared
+                </div>
+            </div> -->
+            <label class="checkbox-label" for="binary-input">
+                <input id="binary-input" class="binary-input" type="checkbox" />
+                <span class="input-slider"></span>
+            </label>
+        </div>
+        <div class="color-container">
+            <div class="title">Choose Link Color</div>
+            <div class="color-input__container">
+                <input type="color" class="color-input" />
+                <div class="color-input__buttons">
+                    <button class="color-input__button reset-button">RESET</button>
+                    <button class="color-input__button save-button">SAVE</button>
+                </div>
+            </div>
+        </div>
+        <div class="saved-colors__wrapper">
+            <div class="title">Saved Colors</div>
+            <div class="saved-colors__container"></div>
+        </div>
     </div>
 </div>
