@@ -1,5 +1,6 @@
 // need this variable so mutation observer has access to history
 let autoClearStatus = false
+let previousHistoryItems;
 initializeObserver()
 
 
@@ -149,11 +150,14 @@ function processChildNodes(parentNode, childNodes, historyItems, type) {
 
 
 chrome.runtime.onMessage.addListener((obj, sender, response) => {
-    const { type, historyItems, chosenColor } = obj
+    let { type, historyItems, chosenColor } = obj
 
+    previousHistoryItems = historyItems
     if (type == "AUTOCLEARTRUE" || type == "AUTOCLEARFALSE") {
         autoClearStatus = (type == "AUTOCLEARTRUE" ? true : false)
-        return
+        if (type == "AUTOCLEARTRUE") {
+            type = "CLEARCLICK"
+        }
     }
 
     if (type == "CLEARCLICK") {
