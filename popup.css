@@ -16,6 +16,7 @@
     border: 2px solid #aed2ff;
     border-radius: 4px;
     height: 440px;
+    gap: 2em;
 }
 
 .color-input__buttons {
